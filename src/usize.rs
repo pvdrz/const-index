@@ -7,7 +7,7 @@ impl<const N: usize> ConstUsize<N> {
     }
 
     #[inline]
-    pub(crate) const fn index(&self) -> usize {
+    pub(crate) const fn value(&self) -> usize {
         N
     }
 }

@@ -16,4 +16,9 @@ fn it_works() {
     assert_eq!(&b[0], f);
     assert_eq!(b, g);
     assert_eq!(&bytes[10..], h);
+
+    assert_eq!(b, bytes.cindex(cindex!(0..10)));
+    assert_eq!(c, bytes.cindex(cindex!(0..=9)));
+    assert_eq!(d, bytes.cindex(cindex!(..10)));
+    assert_eq!(e, bytes.cindex(cindex!(..=9)));
 }

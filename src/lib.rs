@@ -30,6 +30,13 @@ macro_rules! cindex {
 pub trait ConstGet<T> {
     fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output>;
     fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output>;
+    unsafe fn cget_unchecked<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
+    unsafe fn cget_unchecked_mut<Idx: ConstSliceIndex<[T]>>(
+        &mut self,
+        index: Idx,
+    ) -> &mut Idx::Output;
+    fn cindex<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
+    fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
     fn csplit_at<const N: usize>(&self, index: ConstUsize<N>) -> (&[T; N], &Self);
 }
 
@@ -42,6 +49,30 @@ impl<T> ConstGet<T> for [T] {
     #[inline]
     fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output> {
         index.get_mut(self)
+    }
+
+    #[inline]
+    unsafe fn cget_unchecked<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
+        &*index.get_unchecked(self)
+    }
+
+    #[inline]
+    unsafe fn cget_unchecked_mut<Idx: ConstSliceIndex<[T]>>(
+        &mut self,
+        index: Idx,
+    ) -> &mut Idx::Output {
+        &mut *index.get_unchecked_mut(self)
+    }
+
+    fn cindex<Idx>(&self, index: Idx) -> &Idx::Output
+    where
+        Idx: ConstSliceIndex<[T]>,
+    {
+        index.index(self)
+    }
+
+    fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output {
+        index.index_mut(self)
     }
 
     fn csplit_at<const N: usize>(&self, _index: ConstUsize<N>) -> (&[T; N], &Self) {
