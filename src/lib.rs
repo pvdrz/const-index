@@ -38,6 +38,7 @@ pub trait ConstGet<T> {
     fn cindex<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
     fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
     fn csplit_at<const N: usize>(&self, index: ConstUsize<N>) -> (&[T; N], &Self);
+    fn csplit_at_mut<const N: usize>(&mut self, index: ConstUsize<N>) -> (&mut [T; N], &mut Self);
 }
 
 impl<T> ConstGet<T> for [T] {
@@ -76,8 +77,17 @@ impl<T> ConstGet<T> for [T] {
     }
 
     fn csplit_at<const N: usize>(&self, _index: ConstUsize<N>) -> (&[T; N], &Self) {
-        let head = self.cget(cindex!(..N)).expect("Index out of bounds");
+        let head = self.cindex(cindex!(..N));
         let tail = unsafe { &*self.get_unchecked(N..) };
+        (head, tail)
+    }
+
+    fn csplit_at_mut<const N: usize>(&mut self, _index: ConstUsize<N>) -> (&mut [T; N], &mut Self) {
+        assert!(N <= self.len());
+
+        let head = unsafe { &mut *cindex!(..N).get_unchecked_mut(self) };
+        let tail = unsafe { &mut *self.get_unchecked_mut(N..) };
+
         (head, tail)
     }
 }
