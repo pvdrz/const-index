@@ -1,11 +1,16 @@
 mod range;
 mod slice_index;
+mod usize;
 
+pub use crate::usize::*;
 pub use range::*;
 pub use slice_index::*;
 
 #[macro_export]
-macro_rules! crange {
+macro_rules! cindex {
+    ($val:tt) => {
+        $crate::ConstUsize::<$val>::new()
+    };
     (..=$max:tt) => {
         $crate::ConstRangeToInclusive::<$max, { $max + 1 }>::new()
     };
@@ -22,23 +27,26 @@ macro_rules! crange {
     };
 }
 
-pub trait ConstGet<Idx> {
-    type Output;
-    fn cget(&self, index: Idx) -> Option<&Self::Output>;
-    fn cget_mut(&mut self, index: Idx) -> Option<&mut Self::Output>;
+pub trait ConstGet<T> {
+    fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output>;
+    fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output>;
+    fn csplit_at<const N: usize>(&self, index: ConstUsize<N>) -> (&[T; N], &Self);
 }
 
-impl<T, I> ConstGet<I> for [T]
-where
-    I: ConstSliceIndex<[T]>,
-{
-    type Output = I::Output;
-
-    fn cget(&self, index: I) -> Option<&Self::Output> {
+impl<T> ConstGet<T> for [T] {
+    #[inline]
+    fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output> {
         index.get(self)
     }
 
-    fn cget_mut(&mut self, index: I) -> Option<&mut Self::Output> {
+    #[inline]
+    fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output> {
         index.get_mut(self)
+    }
+
+    fn csplit_at<const N: usize>(&self, _index: ConstUsize<N>) -> (&[T; N], &Self) {
+        let head = self.cget(cindex!(..N)).expect("Index out of bounds");
+        let tail = unsafe { &*self.get_unchecked(N..) };
+        (head, tail)
     }
 }
