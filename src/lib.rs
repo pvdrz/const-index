@@ -65,13 +65,12 @@ impl<T> ConstGet<T> for [T] {
         &mut *index.get_unchecked_mut(self)
     }
 
-    fn cindex<Idx>(&self, index: Idx) -> &Idx::Output
-    where
-        Idx: ConstSliceIndex<[T]>,
-    {
+    #[inline]
+    fn cindex<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
         index.index(self)
     }
 
+    #[inline]
     fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output {
         index.index_mut(self)
     }
