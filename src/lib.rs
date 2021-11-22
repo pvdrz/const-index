@@ -27,7 +27,13 @@ macro_rules! cindex {
     };
 }
 
-pub trait ConstGet<T> {
+mod sealed {
+    pub trait Sealed {}
+
+    impl<T> Sealed for [T] {}
+}
+
+pub trait ConstGet<T>: sealed::Sealed {
     fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output>;
     fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output>;
     unsafe fn cget_unchecked<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
@@ -78,6 +84,7 @@ impl<T> ConstGet<T> for [T] {
     fn csplit_at<const N: usize>(&self, _index: ConstUsize<N>) -> (&[T; N], &Self) {
         let head = self.cindex(cindex!(..N));
         let tail = unsafe { &*self.get_unchecked(N..) };
+
         (head, tail)
     }
 

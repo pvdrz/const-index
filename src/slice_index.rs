@@ -3,7 +3,23 @@ use core::ops::{Index, IndexMut};
 use crate::range::{ConstRange, ConstRangeInclusive, ConstRangeTo, ConstRangeToInclusive};
 use crate::usize::ConstUsize;
 
-pub unsafe trait ConstSliceIndex<T: ?Sized> {
+mod sealed {
+    use super::*;
+
+    pub trait Sealed {}
+
+    impl<const N: usize> Sealed for ConstUsize<N> {}
+    impl<const MIN: usize, const MAX: usize, const LEN: usize> Sealed for ConstRange<MIN, MAX, LEN> {}
+    impl<const MIN: usize, const MAX: usize, const LEN: usize> Sealed
+        for ConstRangeInclusive<MIN, MAX, LEN>
+    {
+    }
+    impl<const MAX: usize> Sealed for ConstRangeTo<MAX> {}
+    impl<const MAX: usize, const LEN: usize> Sealed for ConstRangeToInclusive<MAX, LEN> {}
+}
+
+/// This trait is a line by line copy of [`SliceIndex`](core::slice::SliceIndex).
+pub unsafe trait ConstSliceIndex<T: ?Sized>: sealed::Sealed {
     type Output;
 
     fn get(self, slice: &T) -> Option<&Self::Output>;
