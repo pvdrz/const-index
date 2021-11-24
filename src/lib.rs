@@ -1,10 +1,12 @@
 mod range;
 mod slice_index;
+mod slice_integer_index;
 mod usize;
 
 pub use crate::usize::*;
 pub use range::*;
 pub use slice_index::*;
+pub use slice_integer_index::*;
 
 #[macro_export]
 macro_rules! cindex {
@@ -40,8 +42,20 @@ pub trait ConstGet<T>: sealed::Sealed {
     unsafe fn cget_unchecked_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
     fn cindex<Idx: SliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
     fn cindex_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
-    fn csplit_at<const N: usize>(&self, index: ConstUsize<N>) -> (&[T; N], &Self);
-    fn csplit_at_mut<const N: usize>(&mut self, index: ConstUsize<N>) -> (&mut [T; N], &mut Self);
+    fn csplit_at<Idx: SliceIntegerIndex<[T]> + Copy>(
+        &self,
+        index: Idx,
+    ) -> (
+        &<Idx::RangeTo as SliceIndex<[T]>>::Output,
+        &<Idx::RangeFrom as SliceIndex<[T]>>::Output,
+    );
+    fn csplit_at_mut<Idx: SliceIntegerIndex<[T]> + Copy>(
+        &mut self,
+        index: Idx,
+    ) -> (
+        &mut <Idx::RangeTo as SliceIndex<[T]>>::Output,
+        &mut <Idx::RangeFrom as SliceIndex<[T]>>::Output,
+    );
 }
 
 impl<T> ConstGet<T> for [T] {
@@ -75,18 +89,30 @@ impl<T> ConstGet<T> for [T] {
         index.index_mut(self)
     }
 
-    fn csplit_at<const N: usize>(&self, _index: ConstUsize<N>) -> (&[T; N], &Self) {
-        let head = self.cindex(cindex!(..N));
-        let tail = unsafe { &*self.get_unchecked(N..) };
+    fn csplit_at<Idx: SliceIntegerIndex<[T]> + Copy>(
+        &self,
+        index: Idx,
+    ) -> (
+        &<Idx::RangeTo as SliceIndex<[T]>>::Output,
+        &<Idx::RangeFrom as SliceIndex<[T]>>::Output,
+    ) {
+        let head = self.cindex(index.range_to());
+        let tail = unsafe { self.cget_unchecked(index.range_from()) };
 
         (head, tail)
     }
 
-    fn csplit_at_mut<const N: usize>(&mut self, _index: ConstUsize<N>) -> (&mut [T; N], &mut Self) {
-        assert!(N <= self.len());
+    fn csplit_at_mut<Idx: SliceIntegerIndex<[T]> + Copy>(
+        &mut self,
+        index: Idx,
+    ) -> (
+        &mut <Idx::RangeTo as SliceIndex<[T]>>::Output,
+        &mut <Idx::RangeFrom as SliceIndex<[T]>>::Output,
+    ) {
+        assert!(index.as_usize() <= self.len());
 
-        let head = unsafe { &mut *cindex!(..N).get_unchecked_mut(self) };
-        let tail = unsafe { &mut *self.get_unchecked_mut(N..) };
+        let head = unsafe { &mut *index.range_to().get_unchecked_mut(self) };
+        let tail = unsafe { self.cget_unchecked_mut(index.range_from()) };
 
         (head, tail)
     }

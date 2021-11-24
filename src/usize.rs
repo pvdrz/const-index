@@ -1,3 +1,4 @@
+#[derive(Clone, Copy)]
 pub struct ConstUsize<const N: usize>();
 
 impl<const N: usize> ConstUsize<N> {

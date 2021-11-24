@@ -257,22 +257,15 @@ unsafe impl<T> SliceIndex<[T]> for Range<usize> {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        unsafe {
-            core::ptr::slice_from_raw_parts(
-                (slice as *const T).add(self.start),
-                self.end - self.start,
-            )
-        }
+        core::ptr::slice_from_raw_parts((slice as *const T).add(self.start), self.end - self.start)
     }
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        unsafe {
-            core::ptr::slice_from_raw_parts_mut(
-                (slice as *mut T).add(self.start),
-                self.end - self.start,
-            )
-        }
+        core::ptr::slice_from_raw_parts_mut(
+            (slice as *mut T).add(self.start),
+            self.end - self.start,
+        )
     }
 
     #[inline]
@@ -301,12 +294,12 @@ unsafe impl<T> SliceIndex<[T]> for RangeFrom<usize> {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        unsafe { (self.start..(*slice).len()).get_unchecked(slice) }
+        (self.start..(*slice).len()).get_unchecked(slice)
     }
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        unsafe { (self.start..(*slice).len()).get_unchecked_mut(slice) }
+        (self.start..(*slice).len()).get_unchecked_mut(slice)
     }
 
     #[inline]
@@ -379,14 +372,12 @@ unsafe impl<T> SliceIndex<[T]> for RangeInclusive<usize> {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
-        unsafe { into_slice_range(self).get_unchecked(slice) }
+        into_slice_range(self).get_unchecked(slice)
     }
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
-        unsafe { into_slice_range(self).get_unchecked_mut(slice) }
+        into_slice_range(self).get_unchecked_mut(slice)
     }
 
     #[inline]
@@ -415,14 +406,12 @@ unsafe impl<T> SliceIndex<[T]> for RangeTo<usize> {
 
     #[inline]
     unsafe fn get_unchecked(self, slice: *const [T]) -> *const [T] {
-        // SAFETY: the caller has to uphold the safety contract for `get_unchecked`.
-        unsafe { (0..self.end).get_unchecked(slice) }
+        (0..self.end).get_unchecked(slice)
     }
 
     #[inline]
     unsafe fn get_unchecked_mut(self, slice: *mut [T]) -> *mut [T] {
-        // SAFETY: the caller has to uphold the safety contract for `get_unchecked_mut`.
-        unsafe { (0..self.end).get_unchecked_mut(slice) }
+        (0..self.end).get_unchecked_mut(slice)
     }
 
     #[inline]
