@@ -19,7 +19,7 @@ mod sealed {
 }
 
 /// This trait is a line by line copy of [`SliceIndex`](core::slice::SliceIndex).
-pub unsafe trait ConstSliceIndex<T: ?Sized>: sealed::Sealed {
+pub unsafe trait SliceIndex<T: ?Sized>: sealed::Sealed {
     type Output;
 
     fn get(self, slice: &T) -> Option<&Self::Output>;
@@ -30,7 +30,7 @@ pub unsafe trait ConstSliceIndex<T: ?Sized>: sealed::Sealed {
     fn index_mut(self, slice: &mut T) -> &mut Self::Output;
 }
 
-unsafe impl<T, const N: usize> ConstSliceIndex<[T]> for ConstUsize<N> {
+unsafe impl<T, const N: usize> SliceIndex<[T]> for ConstUsize<N> {
     type Output = T;
 
     #[inline]
@@ -64,7 +64,7 @@ unsafe impl<T, const N: usize> ConstSliceIndex<[T]> for ConstUsize<N> {
     }
 }
 
-unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> ConstSliceIndex<[T]>
+unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> SliceIndex<[T]>
     for ConstRange<MIN, MAX, LEN>
 {
     type Output = [T; LEN];
@@ -98,7 +98,7 @@ unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> ConstSliceI
     }
 }
 
-unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> ConstSliceIndex<[T]>
+unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> SliceIndex<[T]>
     for ConstRangeInclusive<MIN, MAX, LEN>
 {
     type Output = [T; LEN];
@@ -132,7 +132,7 @@ unsafe impl<T, const MIN: usize, const MAX: usize, const LEN: usize> ConstSliceI
     }
 }
 
-unsafe impl<T, const MAX: usize> ConstSliceIndex<[T]> for ConstRangeTo<MAX> {
+unsafe impl<T, const MAX: usize> SliceIndex<[T]> for ConstRangeTo<MAX> {
     type Output = [T; MAX];
 
     fn get(self, slice: &[T]) -> Option<&Self::Output> {
@@ -164,7 +164,7 @@ unsafe impl<T, const MAX: usize> ConstSliceIndex<[T]> for ConstRangeTo<MAX> {
     }
 }
 
-unsafe impl<T, const MAX: usize, const LEN: usize> ConstSliceIndex<[T]>
+unsafe impl<T, const MAX: usize, const LEN: usize> SliceIndex<[T]>
     for ConstRangeToInclusive<MAX, LEN>
 {
     type Output = [T; LEN];

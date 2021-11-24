@@ -34,50 +34,44 @@ mod sealed {
 }
 
 pub trait ConstGet<T>: sealed::Sealed {
-    fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output>;
-    fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output>;
-    unsafe fn cget_unchecked<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
-    unsafe fn cget_unchecked_mut<Idx: ConstSliceIndex<[T]>>(
-        &mut self,
-        index: Idx,
-    ) -> &mut Idx::Output;
-    fn cindex<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
-    fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
+    fn cget<Idx: SliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output>;
+    fn cget_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output>;
+    unsafe fn cget_unchecked<Idx: SliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
+    unsafe fn cget_unchecked_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
+    fn cindex<Idx: SliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output;
+    fn cindex_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output;
     fn csplit_at<const N: usize>(&self, index: ConstUsize<N>) -> (&[T; N], &Self);
     fn csplit_at_mut<const N: usize>(&mut self, index: ConstUsize<N>) -> (&mut [T; N], &mut Self);
 }
 
 impl<T> ConstGet<T> for [T] {
     #[inline]
-    fn cget<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output> {
+    fn cget<Idx: SliceIndex<[T]>>(&self, index: Idx) -> Option<&Idx::Output> {
         index.get(self)
     }
 
     #[inline]
-    fn cget_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output> {
+    fn cget_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> Option<&mut Idx::Output> {
         index.get_mut(self)
     }
 
     #[inline]
-    unsafe fn cget_unchecked<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
+    unsafe fn cget_unchecked<Idx: SliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
         &*index.get_unchecked(self)
     }
 
     #[inline]
-    unsafe fn cget_unchecked_mut<Idx: ConstSliceIndex<[T]>>(
-        &mut self,
-        index: Idx,
-    ) -> &mut Idx::Output {
+    unsafe fn cget_unchecked_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output {
         &mut *index.get_unchecked_mut(self)
     }
 
     #[inline]
-    fn cindex<Idx: ConstSliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
+    fn cindex<Idx: SliceIndex<[T]>>(&self, index: Idx) -> &Idx::Output {
         index.index(self)
     }
 
     #[inline]
-    fn cindex_mut<Idx: ConstSliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output {
+    fn cindex_mut<Idx: SliceIndex<[T]>>(&mut self, index: Idx) -> &mut Idx::Output {
         index.index_mut(self)
     }
 
